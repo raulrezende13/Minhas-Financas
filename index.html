@@ -107,7 +107,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Cards e Resumos */
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -151,7 +150,6 @@
     .card-value.pending { color: var(--warning); }
     .card-value.receivable { color: var(--purple); }
 
-    /* Listagens */
     .section-title {
       font-size: 0.95rem;
       font-weight: 600;
@@ -249,7 +247,6 @@
     .badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
     .badge.third { background: rgba(139, 92, 246, 0.15); color: var(--purple); }
 
-    /* Barra de Navegação Inferior */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -292,7 +289,6 @@
       color: var(--primary);
     }
 
-    /* Botão Flutuante de Ação */
     .fab {
       position: fixed;
       right: 20px;
@@ -312,7 +308,6 @@
       z-index: 45;
     }
 
-    /* Modal / Formulário */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -394,6 +389,23 @@
       margin-top: 8px;
     }
 
+    .btn-pdf {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
     .btn-secondary {
       width: 100%;
       background: transparent;
@@ -431,7 +443,6 @@
       font-size: 0.9rem;
     }
 
-    /* Gráficos / Barras de progresso */
     .bar-container {
       margin-bottom: 14px;
     }
@@ -467,9 +478,89 @@
       cursor: pointer;
       margin-top: 6px;
     }
+
+    /* =========================================================
+       CONFIGURAÇÃO EXCLUSIVA PARA GERAÇÃO / IMPRESSÃO EM PDF
+       ========================================================= */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding-bottom: 0 !important;
+      }
+
+      header, .bottom-nav, .fab, .modal-overlay, .btn-pdf, .btn-submit, .btn-secondary, input[type="file"], .date-badge input {
+        display: none !important;
+      }
+
+      .tab-content {
+        display: block !important;
+      }
+
+      #tab-home, #tab-thirdparty {
+        display: none !important;
+      }
+
+      #tab-reports, #tab-transactions {
+        display: block !important;
+      }
+
+      .card {
+        background: #ffffff !important;
+        border: 1px solid #cccccc !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 16px !important;
+      }
+
+      .card-value, .item-amount, .bar-info {
+        color: #000000 !important;
+      }
+
+      .bar-track {
+        background: #e5e7eb !important;
+        border: 1px solid #d1d5db !important;
+      }
+
+      .bar-fill {
+        background: #3b82f6 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .item-row {
+        background: #ffffff !important;
+        border: 1px solid #e5e7eb !important;
+        color: #000000 !important;
+        page-break-inside: avoid;
+      }
+
+      .item-icon {
+        display: none !important;
+      }
+
+      .print-header {
+        display: block !important;
+        margin-bottom: 20px;
+        text-align: center;
+        border-bottom: 2px solid #333333;
+        padding-bottom: 10px;
+      }
+    }
+
+    .print-header {
+      display: none;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Cabeçalho exibido apenas no PDF -->
+  <div class="print-header">
+    <h2 style="font-size: 1.4rem;">Relatório Financeiro Mensal</h2>
+    <p id="print-date-display" style="font-size: 0.9rem; color: #555;"></p>
+  </div>
 
   <header>
     <h1>Finanças Pessoais</h1>
@@ -534,8 +625,15 @@
       <div id="thirdparty-settled-list" class="item-list"></div>
     </section>
 
-    <!-- ABA 4: RELATÓRIOS & BACKUP -->
+    <!-- ABA 4: RELATÓRIOS & BACKUP & EXPORTAR PDF -->
     <section id="tab-reports" class="tab-content">
+      
+      <!-- BOTÃO DE EXPORTAÇÃO EM PDF -->
+      <button class="btn-pdf" onclick="FinanceApp.exportPDF()">
+        <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        Exportar Relatório Mensal em PDF
+      </button>
+
       <div class="card" style="margin-bottom: 16px;">
         <div class="card-label">Despesas por Categoria</div>
         <div id="category-report" style="margin-top: 14px;"></div>
@@ -544,7 +642,7 @@
       <div class="card">
         <div class="card-label">Backup e Segurança Local</div>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin: 8px 0 14px 0;">
-          Os dados ficam armazenados exclusivamente no seu celular. Exporte um backup mensal para segurança.
+          Os dados ficam armazenados exclusivamente no seu dispositivo. Exporte um backup JSON regularmente.
         </p>
         <button class="btn-submit" onclick="FinanceApp.exportBackup()" style="margin-bottom: 8px;">Exportar Backup (JSON)</button>
         <input type="file" id="backupFileInput" style="display: none;" onchange="FinanceApp.importBackup(event)">
@@ -629,7 +727,6 @@
           </div>
         </div>
 
-        <!-- Módulo Terceiros -->
         <label class="checkbox-tile" id="thirdPartyBoxWrapper">
           <input type="checkbox" id="txIsThirdParty" onchange="FinanceApp.toggleThirdPartyField()">
           <span style="font-size: 0.85rem; font-weight: 600;">Gasto de Terceiro (Cartão Emprestado)</span>
@@ -640,7 +737,6 @@
           <input type="text" id="txThirdPartyName" placeholder="Ex: Mãe, Irmão, Amigo">
         </div>
 
-        <!-- Parcelamento -->
         <div class="form-group" id="installmentGroup">
           <label>Parcelamento</label>
           <select id="txInstallments">
@@ -663,11 +759,7 @@
   </div>
 
   <script>
-    /* ====================================================================
-       GERAÇÃO DINÂMICA DE PWA (MANIFEST & SERVICE WORKER VIA DATA URL/BLOB)
-       ==================================================================== */
     (function initPWA() {
-      // 1. Web App Manifest embutido
       const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#3b82f6"><rect width="512" height="512" rx="128" fill="#0b0f17"/><path fill="#3b82f6" d="M256 96c-88.37 0-160 71.63-160 160s71.63 160 160 160 160-71.63 160-160S344.37 96 256 96zm24 232h-48v-24h-16c-13.25 0-24-10.75-24-24v-40c0-13.25 10.75-24 24-24h64v-24h-64v-16h48v-24h48v24h16c13.25 0 24 10.75 24 24v40c0 13.25-10.75 24-24 24h-64v24h64v16h-48v24z"/></svg>`;
       const iconDataUrl = "data:image/svg+xml;base64," + btoa(iconSvg);
 
@@ -689,22 +781,16 @@
       linkTag.href = manifestUrl;
       document.head.appendChild(linkTag);
 
-      // Ícone para Safari/iOS
       const appleTouchIcon = document.createElement("link");
       appleTouchIcon.rel = "apple-touch-icon";
       appleTouchIcon.href = iconDataUrl;
       document.head.appendChild(appleTouchIcon);
 
-      // 2. Service Worker embutido para funcionamento Offline
       if ("serviceWorker" in navigator) {
         const swCode = `
-          const CACHE_NAME = 'financas-cache-v1';
-          self.addEventListener('install', (e) => {
-            self.skipWaiting();
-          });
-          self.addEventListener('activate', (e) => {
-            e.waitUntil(clients.claim());
-          });
+          const CACHE_NAME = 'financas-cache-v2';
+          self.addEventListener('install', (e) => { self.skipWaiting(); });
+          self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
           self.addEventListener('fetch', (e) => {
             e.respondWith(
               caches.match(e.request).then((res) => res || fetch(e.request).catch(() => caches.match(e.request)))
@@ -713,13 +799,10 @@
         `;
         const swBlob = new Blob([swCode], { type: "application/javascript" });
         const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration fallback:', err));
+        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW fallback:', err));
       }
     })();
 
-    /* ====================================================================
-       REGRAS DE NEGÓCIO, CATEGORIAS E CONTROLE DE ESTADO
-       ==================================================================== */
     const DEFAULT_CATEGORIES = [
       "Mercado", "Necessidades", "Eletrônicos", "Assinaturas", "Roupa",
       "Beleza", "Presentes", "Saúde", "Despesas eventuais", "Desenvolvimento",
@@ -818,7 +901,6 @@
         group.style.display = isThird ? "block" : "none";
       },
 
-      /* Gerador Automático de Parcelas e Cadastro */
       handleFormSubmit(e) {
         e.preventDefault();
         const type = document.getElementById("txType").value;
@@ -866,7 +948,6 @@
         this.toggleTypeFields();
       },
 
-      /* Marcação de Reembolso de Terceiros */
       settleThirdParty(id) {
         const tx = this.data.transactions.find(t => t.id === id);
         if (tx) {
@@ -875,7 +956,6 @@
         }
       },
 
-      /* Toggle Pago/Pendente */
       toggleStatus(id) {
         const tx = this.data.transactions.find(t => t.id === id);
         if (tx) {
@@ -888,9 +968,14 @@
         return val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       },
 
-      /* Renderização Geral */
+      /* Exportar para PDF formatado */
+      exportPDF() {
+        const [year, month] = this.currentMonth.split("-");
+        document.getElementById("print-date-display").innerText = `Mês de Referência: ${month}/${year} | Gerado em: ${new Date().toLocaleDateString('pt-BR')}`;
+        window.print();
+      },
+
       renderAll() {
-        const [selYear, selMonth] = this.currentMonth.split("-");
         const monthTx = this.data.transactions.filter(t => t.date.startsWith(this.currentMonth));
 
         let balanceEfetivado = 0;
@@ -898,29 +983,24 @@
         let totalGastosPessoais = 0;
         let totalPendentes = 0;
 
-        // Cálculos do mês atual respeitando a Regra de Ouro (não inflar custo pessoal com terceiros)
         monthTx.forEach(t => {
           if (t.type === "receita") {
             totalReceitas += t.amount;
             if (t.status === "pago") balanceEfetivado += t.amount;
           } else {
-            // Se for gasto de terceiro, não entra no custo de vida pessoal
             if (!t.isThirdParty) {
               totalGastosPessoais += t.amount;
               if (t.status === "pago") balanceEfetivado -= t.amount;
               else totalPendentes += t.amount;
             } else {
-              // Terceiro pago no cartão diminui a conta bancária efetivada, mas não soma aos gastos pessoais
               if (t.status === "pago") balanceEfetivado -= t.amount;
             }
           }
         });
 
-        // Total a receber de terceiros acumulado geral
         const allThirdPartyPending = this.data.transactions.filter(t => t.isThirdParty && !t.isSettled);
         const totalReceivable = allThirdPartyPending.reduce((sum, t) => sum + t.amount, 0);
 
-        // Atualizar Resumo Superior
         document.getElementById("val-balance").innerText = this.formatCurrency(balanceEfetivado);
         document.getElementById("val-income").innerText = this.formatCurrency(totalReceitas);
         document.getElementById("val-expense").innerText = this.formatCurrency(totalGastosPessoais);
@@ -928,16 +1008,9 @@
         document.getElementById("val-receivable-summary").innerText = this.formatCurrency(totalReceivable);
         document.getElementById("val-thirdparty-total").innerText = this.formatCurrency(totalReceivable);
 
-        // Renderizar Extrato por Cartão no Mês
         this.renderAccountsBreakdown(monthTx);
-
-        // Renderizar Lista Recente e Completa do Mês
         this.renderMonthTransactions(monthTx);
-
-        // Renderizar Aba Terceiros
         this.renderThirdPartyList();
-
-        // Renderizar Relatório de Categorias
         this.renderCategoriesReport(monthTx);
       },
 
